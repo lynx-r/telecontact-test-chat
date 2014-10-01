@@ -1,4 +1,4 @@
-package me.alekspo.chat.client;
+package me.alekspo.chat.client.message;
 
 import javax.json.Json;
 import javax.json.JsonObject;
@@ -18,9 +18,11 @@ public class ChatDecoder implements Decoder.Text<ChatMessage> {
   public ChatMessage decode(String s) throws DecodeException {
     JsonObject jsonObject = Json.createReader(new StringReader(s)).readObject();
     ChatMessage message = new ChatMessage();
+    message.setType(jsonObject.getString("type"));
     message.setLogin(jsonObject.getString("login"));
-    message.setMessage(jsonObject.getString("message"));
-    message.setPassword(jsonObject.getString("password"));
+    message.setPassword(jsonObject.getString("password", ""));
+    message.setMessage(jsonObject.getString("message", ""));
+    message.setData(jsonObject.getString("data"));
     return message;
   }
 
@@ -28,9 +30,10 @@ public class ChatDecoder implements Decoder.Text<ChatMessage> {
   public boolean willDecode(String s) {
     JsonObject jsonObject = Json.createReader(new StringReader(s)).readObject();
     String type = jsonObject.getString("type");
-    return type.equals(ChatMessage.LOGIN)
-        || type.equals(ChatMessage.MESSAGE)
-        || type.equals(ChatMessage.REGISTER);
+    return type.equals(ChatMessage.MESSAGE)
+        || type.equals(ChatMessage.LOGIN)
+        || type.equals(ChatMessage.REGISTER)
+        || type.equals(ChatMessage.USERLIST_UPDATE);
   }
 
   @Override

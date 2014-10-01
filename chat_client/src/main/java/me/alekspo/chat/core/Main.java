@@ -30,13 +30,13 @@ public class Main extends Application {
 
   @Override
   public void start(Stage primaryStage) throws Exception {
-    Scene scene = createMainScene(MAIN_WINDOW_FXML);
+    Scene scene = createMainWindow(MAIN_WINDOW_FXML);
     primaryStage.setScene(scene);
     primaryStage.sizeToScene();
     primaryStage.show();
   }
 
-  public Scene createMainScene(String fxml) {
+  public Scene createMainWindow(String fxml) {
     FXMLLoader loader = new FXMLLoader();
     URL location = getClass().getResource(fxml);
     loader.setBuilderFactory(new JavaFXBuilderFactory());

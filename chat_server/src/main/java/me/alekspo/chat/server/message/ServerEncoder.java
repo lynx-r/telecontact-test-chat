@@ -1,4 +1,4 @@
-package me.alekspo.chat.client;
+package me.alekspo.chat.server.message;
 
 import javax.websocket.EncodeException;
 import javax.websocket.Encoder;
@@ -8,12 +8,12 @@ import javax.websocket.EndpointConfig;
  * Created with IntelliJ IDEA.
  * User: alekspo
  * Date: 01.10.14
- * Time: 14:14
+ * Time: 23:20
  */
-public class ChatEncoder implements Encoder.Text<ChatMessage> {
+public class ServerEncoder implements Encoder.Text<ServerMessage> {
   @Override
-  public String encode(ChatMessage chatMessage) throws EncodeException {
-    return chatMessage.toString();
+  public String encode(ServerMessage serverMessage) throws EncodeException {
+    return serverMessage.asString();
   }
 
   @Override

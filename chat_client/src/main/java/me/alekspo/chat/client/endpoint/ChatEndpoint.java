@@ -1,5 +1,9 @@
-package me.alekspo.chat.client;
+package me.alekspo.chat.client.endpoint;
 
+import me.alekspo.chat.client.Message;
+import me.alekspo.chat.client.message.ChatDecoder;
+import me.alekspo.chat.client.message.ChatEncoder;
+import me.alekspo.chat.client.message.ChatMessage;
 import me.alekspo.chat.controller.MainWindowController;
 import me.alekspo.chat.core.Main;
 import org.controlsfx.dialog.Dialogs;
@@ -11,6 +15,7 @@ import javax.websocket.OnMessage;
 import javax.websocket.OnOpen;
 import javax.websocket.Session;
 import javax.websocket.WebSocketContainer;
+import java.io.IOException;
 import java.net.URI;
 import java.util.logging.Logger;
 
@@ -21,8 +26,8 @@ import java.util.logging.Logger;
  * Time: 14:08
  */
 @ClientEndpoint(
-    decoders = ChatDecoder.class,
-    encoders = ChatEncoder.class)
+    decoders = {ChatDecoder.class},
+    encoders = {ChatEncoder.class})
 public class ChatEndpoint {
 
   final static Logger logger = Logger.getLogger("application");
@@ -54,7 +59,7 @@ public class ChatEndpoint {
 
   @OnMessage
   public void onMessage(ChatMessage message) {
-    logger.info("Received message: " + message.toString());
+    logger.info("Received message: " + message.asString());
 
     switch (message.getType()) {
 //      case ChatMessage.LOGIN_RESPONSE:
@@ -73,5 +78,16 @@ public class ChatEndpoint {
 
   private void handleChatMessage(String username, String messageData) {
     mainWindowController.addChatMessage(username + "> " + messageData);
+  }
+
+  public static void sendMessage(Message msg) {
+    if (userSession != null) {
+      try {
+        userSession.getBasicRemote().sendText(msg.asString());
+        logger.info("Sent message: " + msg.asString());
+      } catch (IOException e) {
+        e.printStackTrace();
+      }
+    }
   }
 }

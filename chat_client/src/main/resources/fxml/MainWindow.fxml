@@ -5,8 +5,7 @@
 <?import java.lang.*?>
 <?import javafx.scene.control.*?>
 
-
-<VBox fx:controller="me.alekspo.chat.controller.MainWindowController" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1">
+<VBox maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="me.alekspo.chat.controller.MainWindowController">
    <children>
       <HBox VBox.vgrow="NEVER">
          <children>
@@ -15,20 +14,20 @@
                   <Insets top="5.0" />
                </padding>
             </Label>
-            <TextField fx:id="loginTextField" promptText="Логин" />
+            <TextField fx:id="loginTextField" promptText="Логин" text="test" />
             <Label text="Пароль">
                <padding>
                   <Insets top="5.0" />
                </padding>
             </Label>
-            <TextField fx:id="passwordTextField" onAction="#loginAction" promptText="Пароль" />
+            <TextField fx:id="passwordTextField" onAction="#loginAction" promptText="Пароль" text="test" />
             <Button fx:id="loginButton" mnemonicParsing="false" onAction="#loginAction" text="Войти" />
          </children>
       </HBox>
       <TextArea fx:id="chatTextArea" disable="true" VBox.vgrow="ALWAYS" />
       <HBox VBox.vgrow="NEVER">
          <children>
-            <TextField onAction="#sendMessageAction" promptText="Введите ваше сообщение" HBox.hgrow="ALWAYS" />
+            <TextField fx:id="messageTextField" onAction="#sendMessageAction" promptText="Введите ваше сообщение" HBox.hgrow="ALWAYS" />
             <Button fx:id="sendMessageButton" mnemonicParsing="false" onAction="#sendMessageAction" text="Отправить" />
          </children>
       </HBox>
