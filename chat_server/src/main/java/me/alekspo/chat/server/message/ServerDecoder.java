@@ -51,6 +51,7 @@ public class ServerDecoder implements Decoder.Text<ServerMessage> {
     String type = jsonObject.getString("type");
     return type.equals(ServerMessage.LOGIN)
         || type.equals(ServerMessage.REGISTER)
+        || type.equals(ServerMessage.REGISTER_RESPONSE)
         || type.equals(ServerMessage.MESSAGE)
         || type.equals(ServerMessage.USERLIST_UPDATE);
   }

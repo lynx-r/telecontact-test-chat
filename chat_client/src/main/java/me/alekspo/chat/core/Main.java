@@ -22,11 +22,7 @@ public class Main extends Application {
   private static final String MAIN_WINDOW_FXML = "/fxml/MainWindow.fxml";
   private static final int MAIN_WINDOW_WIDTH = 1140;
   private static final int MAIN_WINDOW_HEIGHT = 520;
-  private static MainWindowController mainWindowController;
-
-  public static MainWindowController getMainWindowController() {
-    return mainWindowController;
-  }
+  private MainWindowController mainWindowController;
 
   @Override
   public void start(Stage primaryStage) throws Exception {
@@ -44,6 +40,7 @@ public class Main extends Application {
     try {
       VBox page = loader.load(location.openStream());
       mainWindowController = loader.getController();
+      mainWindowController.connectToServer();
       return new Scene(page, MAIN_WINDOW_WIDTH, MAIN_WINDOW_HEIGHT, Color.WHITE);
     } catch (IOException e) {
       e.printStackTrace();

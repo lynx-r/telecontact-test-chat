@@ -1,9 +1,12 @@
 package me.alekspo.chat.server.endpoint;
 
+import me.alekspo.chat.entity.ChatUser;
 import me.alekspo.chat.server.message.ServerDecoder;
 import me.alekspo.chat.server.message.ServerEncoder;
 import me.alekspo.chat.server.message.ServerMessage;
+import me.alekspo.chat.session.ChatUserFacade;
 
+import javax.inject.Inject;
 import javax.websocket.CloseReason;
 import javax.websocket.OnMessage;
 import javax.websocket.OnOpen;
@@ -30,6 +33,9 @@ public class ChatEndpoint {
   private static ConcurrentHashMap<String, Session> connections = new ConcurrentHashMap<String, Session>();
   private long MAX_IDLE_TIMEOUT = 1000 * 60 * 60;
 
+  @Inject
+  private ChatUserFacade chatUserFacade;
+
   @OnOpen
   public void init(Session s) {
     logger.info("############ Someone connected to chat... " + s.toString());
@@ -41,6 +47,8 @@ public class ChatEndpoint {
     logger.info("Get message " + message.asString());
 
     switch (messageType) {
+      case ServerMessage.REGISTER:
+        handleRegisterRequest(session, message);
       case ServerMessage.LOGIN:
         handleLoginRequest(session, message);
         break;
@@ -50,6 +58,23 @@ public class ChatEndpoint {
       case ServerMessage.DISCONNECT:
         handleDisconnectRequest(session, message);
         break;
+    }
+  }
+
+  private void handleRegisterRequest(Session session, ServerMessage message) {
+    RemoteEndpoint.Basic remote = session.getBasicRemote();
+    ServerMessage serverMessage = new ServerMessage(ServerMessage.REGISTER_RESPONSE, message.getLogin());
+    if (chatUserFacade.findByUsername(message.getLogin()).size() > 0) {
+      serverMessage.setData("duplicate");
+    } else {
+      ChatUser chatUser = new ChatUser(message.getLogin(), message.getPassword());
+      chatUserFacade.create(chatUser);
+    }
+
+    try {
+      remote.sendText(serverMessage.asString());
+    } catch (IOException ioe) {
+      logger.warning("Error sending message to client " + remote + " : " + ioe.getMessage());
     }
   }
 
@@ -117,11 +142,4 @@ public class ChatEndpoint {
     }
   }
 
-  private String registerNewUsername(String newUsername, Session session) {
-    if (connections.containsKey(newUsername)) {
-      return registerNewUsername(newUsername + "1", session);
-    }
-
-    return newUsername;
-  }
 }

@@ -1,11 +1,11 @@
 package me.alekspo.chat.client.endpoint;
 
+import javafx.application.Platform;
 import me.alekspo.chat.client.Message;
 import me.alekspo.chat.client.message.ChatDecoder;
 import me.alekspo.chat.client.message.ChatEncoder;
 import me.alekspo.chat.client.message.ChatMessage;
 import me.alekspo.chat.controller.MainWindowController;
-import me.alekspo.chat.core.Main;
 import org.controlsfx.dialog.Dialogs;
 
 import javax.websocket.ClientEndpoint;
@@ -32,11 +32,11 @@ public class ChatEndpoint {
 
   final static Logger logger = Logger.getLogger("application");
 
-  private static Session userSession;
+  private Session userSession;
 
   private MainWindowController mainWindowController;
 
-  public ChatEndpoint(URI endpointURI) {
+  public ChatEndpoint(URI endpointURI, MainWindowController mainWindowController) {
     try {
       WebSocketContainer container = ContainerProvider
           .getWebSocketContainer();
@@ -48,7 +48,7 @@ public class ChatEndpoint {
     } catch (Exception e) {
       e.printStackTrace();
     }
-    mainWindowController = Main.getMainWindowController();
+    this.mainWindowController = mainWindowController;
   }
 
   @OnOpen
@@ -62,6 +62,9 @@ public class ChatEndpoint {
     logger.info("Received message: " + message.asString());
 
     switch (message.getType()) {
+      case ChatMessage.REGISTER_RESPONSE:
+        handleRegisterResponse(message);
+        break;
 //      case ChatMessage.LOGIN_RESPONSE:
 //        username = message.getUsername();
 //        break;
@@ -75,12 +78,32 @@ public class ChatEndpoint {
     }
   }
 
+  private void handleRegisterResponse(ChatMessage message) {
+    if (message.getLogin().equals(mainWindowController.getLogin())) {
+      if (message.getData().isEmpty()) {
+        Platform.runLater(() -> {
+          Dialogs.create().title("Информация").masthead("Вы успешно зарегистрировались.").showInformation();
+        });
+      } else {
+        Platform.runLater(() -> {
+          Dialogs.create().title("Информация").masthead("Имя " + message.getLogin() + " уже занято!").showInformation();
+        });
+      }
+    }
+  }
+
 
   private void handleChatMessage(String username, String messageData) {
     mainWindowController.addChatMessage(username + "> " + messageData);
   }
 
-  public static void sendMessage(Message msg) {
+  public void sendMessage(Message msg) {
+    if (!userSession.isOpen()) {
+      mainWindowController.connectToServer();
+      Dialogs.create().title("Информация").masthead(
+          "Соединение с сервером утерено. Восстанавливаем соединение... Повторите попытку."
+      ).showInformation();
+    }
     if (userSession != null) {
       try {
         userSession.getBasicRemote().sendText(msg.asString());

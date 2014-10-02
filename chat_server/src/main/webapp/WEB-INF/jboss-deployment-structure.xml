@@ -8,6 +8,7 @@
     <dependencies>
       <module name="javax.websocket.api"/>
       <module name="org.glassfish.javax.json"/>
+      <module name="com.h2database.h2"/>
     </dependencies>
   </deployment>
 </jboss-deployment-structure>

@@ -20,16 +20,20 @@
                   <Insets top="5.0" />
                </padding>
             </Label>
-            <TextField fx:id="passwordTextField" onAction="#loginAction" promptText="Пароль" text="test" />
+            <PasswordField fx:id="passwordTextField" onAction="#loginAction" promptText="Пароль" text="test" />
             <Button fx:id="loginButton" mnemonicParsing="false" onAction="#loginAction" text="Войти" />
             <Button fx:id="registerButton" mnemonicParsing="false" onAction="#registerAction" text="Регистрация" />
          </children>
       </HBox>
-      <TextArea fx:id="chatTextArea" disable="true" VBox.vgrow="ALWAYS" />
-      <HBox VBox.vgrow="NEVER">
+      <HBox VBox.vgrow="ALWAYS">
          <children>
-            <TextField fx:id="messageTextField" onAction="#sendMessageAction" promptText="Введите ваше сообщение" HBox.hgrow="ALWAYS" />
-            <Button fx:id="sendMessageButton" mnemonicParsing="false" onAction="#sendMessageAction" text="Отправить" />
+            <VBox HBox.hgrow="ALWAYS">
+               <children>
+                  <TextArea fx:id="chatTextArea" disable="true" VBox.vgrow="ALWAYS" />
+                  <TextField fx:id="messageTextField" onAction="#sendMessageAction" promptText="Введите ваше сообщение и нажмите Enter" />
+               </children>
+            </VBox>
+            <ListView prefHeight="200.0" prefWidth="200.0" />
          </children>
       </HBox>
    </children>

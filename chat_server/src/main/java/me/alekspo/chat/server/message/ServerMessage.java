@@ -14,6 +14,7 @@ import java.util.Set;
  */
 public class ServerMessage implements Message {
   public static final String REGISTER = "register";
+  public static final String REGISTER_RESPONSE = "register_response";
   public static final String LOGIN = "login";
   public static final String DISCONNECT = "disconnect";
   public static final String MESSAGE = "message";
@@ -23,9 +24,7 @@ public class ServerMessage implements Message {
   private String password;
   private String data;
   private String message;
-
   public ServerMessage() {}
-
   public ServerMessage(String type) {
     this.type = type;
   }
@@ -49,30 +48,12 @@ public class ServerMessage implements Message {
     this.password = password;
   }
 
-  public String getData() {
-    return data;
-  }
-
   public void setData(Set<String> dataSet) {
     JsonArrayBuilder jsonArrayBuilder = Json.createArrayBuilder();
     for (String user : dataSet) {
       jsonArrayBuilder.add(user);
     }
     data = jsonArrayBuilder.build().toString();
-  }
-
-  public void setData(String data) {
-    this.data = data;
-  }
-
-  public String asString() {
-    return Json.createObjectBuilder()
-        .add("type", type != null ? type : "")
-        .add("login", login != null ? login : "")
-        .add("message", message != null ? message : "")
-        .add("password", password != null ? password : "")
-        .add("data", data != null ? data : "")
-        .build().toString();
   }
 
   public String getLogin() {
@@ -91,11 +72,29 @@ public class ServerMessage implements Message {
     this.type = type;
   }
 
-  public void setMessage(String message) {
-    this.message = message;
+  public String getData() {
+    return data;
+  }
+
+  public void setData(String data) {
+    this.data = data;
+  }
+
+  public String asString() {
+    return Json.createObjectBuilder()
+        .add("type", type != null ? type : "")
+        .add("login", login != null ? login : "")
+        .add("message", message != null ? message : "")
+        .add("password", password != null ? password : "")
+        .add("data", data != null ? data : "")
+        .build().toString();
   }
 
   public String getMessage() {
     return message;
+  }
+
+  public void setMessage(String message) {
+    this.message = message;
   }
 }

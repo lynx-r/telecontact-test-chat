@@ -33,6 +33,7 @@ public class ChatDecoder implements Decoder.Text<ChatMessage> {
     return type.equals(ChatMessage.MESSAGE)
         || type.equals(ChatMessage.LOGIN)
         || type.equals(ChatMessage.REGISTER)
+        || type.equals(ChatMessage.REGISTER_RESPONSE)
         || type.equals(ChatMessage.USERLIST_UPDATE);
   }
 
