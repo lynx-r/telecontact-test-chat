@@ -32,17 +32,20 @@ import java.util.logging.Logger;
     encoders = {ChatEncoder.class})
 public class ChatEndpoint {
 
+  private static final String SERVER_ENDPOINT_URI = "ws://chat-stylishkids.rhcloud.com:8000/ws/chat";
+//  private static final String SERVER_ENDPOINT_URI = "ws://localhost:8080/ws/chat";
+
   final static Logger logger = Logger.getLogger("application");
 
   private Session userSession;
 
   private MainWindowController mainWindowController;
 
-  public ChatEndpoint(URI endpointURI, MainWindowController mainWindowController) {
+  public ChatEndpoint(MainWindowController mainWindowController) {
     try {
       WebSocketContainer container = ContainerProvider
           .getWebSocketContainer();
-      container.connectToServer(this, endpointURI);
+      container.connectToServer(this, new URI(SERVER_ENDPOINT_URI));
 //      container.setDefaultMaxSessionIdleTimeout(10000);
     } catch (DeploymentException ignored) {
       ignored.printStackTrace();

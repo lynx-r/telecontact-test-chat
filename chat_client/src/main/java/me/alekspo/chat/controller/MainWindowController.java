@@ -13,7 +13,6 @@ import me.alekspo.chat.client.endpoint.ChatEndpoint;
 import me.alekspo.chat.client.message.ChatMessage;
 
 import java.math.BigInteger;
-import java.net.URI;
 import java.net.URL;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -27,7 +26,6 @@ import java.util.ResourceBundle;
  * Time: 12:57
  */
 public class MainWindowController extends VBox implements Initializable {
-  private static final String SERVER_ENDPOINT_URI = "ws://localhost:8080/ws/chat";
 
   public TextArea chatTextArea;
   public TextField loginTextField;
@@ -59,7 +57,7 @@ public class MainWindowController extends VBox implements Initializable {
 
   public void connectToServer() {
     try {
-      chatEndpoint = new ChatEndpoint(new URI(SERVER_ENDPOINT_URI), this);
+      chatEndpoint = new ChatEndpoint(this);
     } catch (Exception e) {
       e.printStackTrace();
     }
