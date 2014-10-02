@@ -28,9 +28,15 @@ public class ChatUserFacade extends AbstractFacade<ChatUser> {
   }
 
   public List<ChatUser> findByUsername(String username) {
-    return em.createNamedQuery("ChatUser.findByName", ChatUser.class)
+    return em.createNamedQuery("ChatUser.findByUsername", ChatUser.class)
         .setParameter("username", username)
         .getResultList();
   }
 
+  public List<ChatUser> findByUsernameAndPassword(String username, String passwordHash) {
+    return em.createNamedQuery("ChatUser.findByUsernameAndPassword", ChatUser.class)
+        .setParameter("username", username)
+        .setParameter("passwordHash", passwordHash)
+        .getResultList();
+  }
 }

@@ -65,16 +65,26 @@ public class ChatEndpoint {
       case ChatMessage.REGISTER_RESPONSE:
         handleRegisterResponse(message);
         break;
-//      case ChatMessage.LOGIN_RESPONSE:
-//        username = message.getUsername();
-//        break;
-//      case ChatMessage.USERLIST_UPDATE:
-//        List<String> updateString = (List) message.getData();
-//        refreshUserlist(updateString);
-//        break;
-      case ChatMessage.MESSAGE:
-        handleChatMessage(message.getLogin(), message.getMessage());
+      case ChatMessage.LOGIN_RESPONSE:
+        handleLoginResponse(message);
         break;
+      case ChatMessage.MESSAGE:
+        handleChatMessage(message);
+        break;
+    }
+  }
+
+  private void handleLoginResponse(ChatMessage message) {
+    if (message.getLogin().equals(mainWindowController.getLogin())) {
+      if (message.getData().isEmpty()) {
+        Platform.runLater(() -> {
+          Dialogs.create().title("Информация").masthead("Вы успешно вошли в чат.").showInformation();
+        });
+      } else {
+        Platform.runLater(() -> {
+          Dialogs.create().title("Информация").masthead("Неверное имя пользователя или пароль.").showInformation();
+        });
+      }
     }
   }
 
@@ -93,15 +103,15 @@ public class ChatEndpoint {
   }
 
 
-  private void handleChatMessage(String username, String messageData) {
-    mainWindowController.addChatMessage(username + "> " + messageData);
+  private void handleChatMessage(ChatMessage message) {
+    mainWindowController.addChatMessage(message.getLogin() + "> " + message.getMessage());
   }
 
   public void sendMessage(Message msg) {
     if (!userSession.isOpen()) {
       mainWindowController.connectToServer();
       Dialogs.create().title("Информация").masthead(
-          "Соединение с сервером утерено. Восстанавливаем соединение... Повторите попытку."
+          "Соединение с сервером утерено. Восстанавливаем... Повторите попытку."
       ).showInformation();
     }
     if (userSession != null) {

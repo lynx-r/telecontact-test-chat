@@ -17,8 +17,10 @@ import javax.validation.constraints.NotNull;
  */
 @Entity
 @NamedQueries({
-    @NamedQuery(name = "ChatUser.findByName",
-        query = "SELECT c FROM ChatUser c WHERE c.username = :username")
+    @NamedQuery(name = "ChatUser.findByUsername",
+        query = "SELECT c FROM ChatUser c WHERE c.username = :username"),
+    @NamedQuery(name = "ChatUser.findByUsernameAndPassword",
+        query = "SELECT c FROM ChatUser c WHERE c.username = :username AND c.passwordHash = :passwordHash")
 })
 public class ChatUser {
 

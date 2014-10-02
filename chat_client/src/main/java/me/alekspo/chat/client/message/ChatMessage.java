@@ -14,6 +14,7 @@ public class ChatMessage implements Message {
   public static final String REGISTER = "register";
   public static final String REGISTER_RESPONSE = "register_response";
   public static final String LOGIN = "login";
+  public static final String LOGIN_RESPONSE = "login_response";
   public static final String USERLIST_UPDATE = "userlist_update";
   public static final String MESSAGE = "message";
   private String type;

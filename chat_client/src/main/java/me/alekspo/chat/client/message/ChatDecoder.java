@@ -32,6 +32,7 @@ public class ChatDecoder implements Decoder.Text<ChatMessage> {
     String type = jsonObject.getString("type");
     return type.equals(ChatMessage.MESSAGE)
         || type.equals(ChatMessage.LOGIN)
+        || type.equals(ChatMessage.LOGIN_RESPONSE)
         || type.equals(ChatMessage.REGISTER)
         || type.equals(ChatMessage.REGISTER_RESPONSE)
         || type.equals(ChatMessage.USERLIST_UPDATE);

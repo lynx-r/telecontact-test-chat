@@ -30,7 +30,7 @@ import java.util.logging.Logger;
 )
 public class ChatEndpoint {
   final static Logger logger = Logger.getLogger("application");
-  private static ConcurrentHashMap<String, Session> connections = new ConcurrentHashMap<String, Session>();
+  private ConcurrentHashMap<String, Session> connections = new ConcurrentHashMap<String, Session>();
   private long MAX_IDLE_TIMEOUT = 1000 * 60 * 60;
 
   @Inject
@@ -49,6 +49,7 @@ public class ChatEndpoint {
     switch (messageType) {
       case ServerMessage.REGISTER:
         handleRegisterRequest(session, message);
+        break;
       case ServerMessage.LOGIN:
         handleLoginRequest(session, message);
         break;
@@ -56,7 +57,7 @@ public class ChatEndpoint {
         handleChatMessage(message);
         break;
       case ServerMessage.DISCONNECT:
-        handleDisconnectRequest(session, message);
+        handleDisconnectRequest(message);
         break;
     }
   }
@@ -79,35 +80,34 @@ public class ChatEndpoint {
   }
 
   public void handleLoginRequest(Session session, ServerMessage serverMessage) {
-    connections.put(serverMessage.getLogin(), session);
-    session.setMaxIdleTimeout(MAX_IDLE_TIMEOUT);
+    if (chatUserFacade.findByUsernameAndPassword(serverMessage.getLogin(), serverMessage.getPassword()).size() == 1) {
+      connections.put(serverMessage.getLogin(), session);
+      session.setMaxIdleTimeout(MAX_IDLE_TIMEOUT);
 
-    logger.info("Signing " + serverMessage.getLogin() + " into ChatMessage.");
-    broadcastUserList(session);
+      ServerMessage responseMessage = new ServerMessage(ServerMessage.LOGIN_RESPONSE, serverMessage.getLogin());
+      sendMessage(session, responseMessage);
+
+      logger.info("Signing " + serverMessage.getLogin() + " into ChatMessage.");
+      broadcastUserList();
+    } else {
+      ServerMessage responseMessage = new ServerMessage(ServerMessage.LOGIN_RESPONSE, serverMessage.getLogin());
+      responseMessage.setData("invalid_login_or_password");
+      sendMessage(session, responseMessage);
+    }
   }
 
   public void handleChatMessage(ServerMessage message) {
     logger.info("Receiving ChatMessage message from " + message.getLogin());
     logger.info("Broadcasting chat message " + message.asString());
     for (Session nextSession : connections.values()) {
-      RemoteEndpoint.Basic remote = nextSession.getBasicRemote();
-      if (remote != null) {
-        try {
-          remote.sendText(message.asString());
-        } catch (IOException ioe) {
-          logger.warning("Error updating a client " + remote + " : " + ioe.getMessage());
-        }
-      }
+      sendMessage(nextSession, message);
     }
   }
 
-  public void handleDisconnectRequest(Session session, ServerMessage serverMessage) {
+  public void handleDisconnectRequest(ServerMessage serverMessage) {
     logger.info(serverMessage.getLogin() + " would like to leave ChatMessage");
-    removeUser(serverMessage.getLogin());
-    broadcastUserList(session);
-  }
+    String login = serverMessage.getLogin();
 
-  private void removeUser(String login) {
     logger.info("Removing " + login + " from StepMessage.");
     Session nextSession = connections.get(login);
 
@@ -121,24 +121,31 @@ public class ChatEndpoint {
     } catch (IOException e) {
       e.printStackTrace();
     }
+
+    broadcastUserList();
   }
 
-
-  private void broadcastUserList(Session session) {
+  private void broadcastUserList() {
     logger.info("Broadcasting updated user list");
     if (!connections.isEmpty()) {
       ServerMessage serverMessage = new ServerMessage(ServerMessage.USERLIST_UPDATE);
       serverMessage.setData(connections.keySet());
 
       for (Session nextSession : connections.values()) {
-        RemoteEndpoint.Basic remote = nextSession.getBasicRemote();
-        try {
-          remote.sendText(serverMessage.asString());
-        } catch (IOException ioe) {
-          logger.warning("Error updating a client " + remote + " : " + ioe.getMessage());
-        }
+        sendMessage(nextSession, serverMessage);
       }
 //      session.broadcast(stepMessage.toString());
+    }
+  }
+
+  private void sendMessage(Session session, ServerMessage message) {
+    RemoteEndpoint.Basic remote = session.getBasicRemote();
+    if (remote != null) {
+      try {
+        remote.sendText(message.asString());
+      } catch (IOException ioe) {
+        logger.warning("Error updating a client " + remote + " : " + ioe.getMessage());
+      }
     }
   }
 

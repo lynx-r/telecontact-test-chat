@@ -49,7 +49,8 @@ public class MainWindowController extends VBox implements Initializable {
   public void loginAction(ActionEvent actionEvent) {
     login = loginTextField.getText();
     ChatMessage msg = new ChatMessage(ChatMessage.LOGIN, login);
-    msg.setPassword(passwordTextField.getText());
+    String hashPassword = hashString(passwordTextField.getText());
+    msg.setPassword(hashPassword);
     chatEndpoint.sendMessage(msg);
   }
 
@@ -77,17 +78,22 @@ public class MainWindowController extends VBox implements Initializable {
     login = loginTextField.getText();
     ChatMessage chatMessage = new ChatMessage(ChatMessage.REGISTER, login);
 
+    String hashPassword = hashString(passwordTextField.getText());
+    chatMessage.setPassword(hashPassword);
+    chatEndpoint.sendMessage(chatMessage);
+  }
+
+  private String hashString(String in) {
     MessageDigest messageDigest;
     try {
       messageDigest = MessageDigest.getInstance("MD5");
     } catch (NoSuchAlgorithmException e) {
       e.printStackTrace();
-      return;
+      return "";
     }
     byte bDigest[] = messageDigest.digest(passwordTextField.getText().getBytes());
     BigInteger bi = new BigInteger(bDigest);
-    chatMessage.setPassword(bi.toString(16));
-    chatEndpoint.sendMessage(chatMessage);
+    return bi.toString(16);
   }
 
 }
