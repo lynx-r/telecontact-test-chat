@@ -4,6 +4,7 @@ import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Button;
+import javafx.scene.control.ListView;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.VBox;
@@ -16,6 +17,7 @@ import java.net.URI;
 import java.net.URL;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.List;
 import java.util.ResourceBundle;
 
 /**
@@ -34,6 +36,7 @@ public class MainWindowController extends VBox implements Initializable {
   public Button sendMessageButton;
   public TextField messageTextField;
   public Button registerButton;
+  public ListView<Object> userListView;
   private String login;
   private ChatEndpoint chatEndpoint;
 
@@ -48,7 +51,7 @@ public class MainWindowController extends VBox implements Initializable {
 
   public void loginAction(ActionEvent actionEvent) {
     login = loginTextField.getText();
-    ChatMessage msg = new ChatMessage(ChatMessage.LOGIN, login);
+    ChatMessage msg = new ChatMessage(ChatMessage.LOGIN_REQUEST, login);
     String hashPassword = hashString(passwordTextField.getText());
     msg.setPassword(hashPassword);
     chatEndpoint.sendMessage(msg);
@@ -76,7 +79,7 @@ public class MainWindowController extends VBox implements Initializable {
 
   public void registerAction(ActionEvent actionEvent) {
     login = loginTextField.getText();
-    ChatMessage chatMessage = new ChatMessage(ChatMessage.REGISTER, login);
+    ChatMessage chatMessage = new ChatMessage(ChatMessage.REGISTER_REQUEST, login);
 
     String hashPassword = hashString(passwordTextField.getText());
     chatMessage.setPassword(hashPassword);
@@ -96,4 +99,12 @@ public class MainWindowController extends VBox implements Initializable {
     return bi.toString(16);
   }
 
+  public void updateUserlistView(List updateList) {
+    userListView.getItems().clear();
+    userListView.getItems().addAll(updateList);
+  }
+
+  public void disconnect() {
+    chatEndpoint.closeSession();
+  }
 }

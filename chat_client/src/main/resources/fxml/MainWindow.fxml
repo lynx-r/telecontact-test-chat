@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import javafx.scene.text.*?>
 <?import javafx.geometry.*?>
 <?import javafx.scene.layout.*?>
 <?import java.lang.*?>
@@ -29,11 +30,15 @@
          <children>
             <VBox HBox.hgrow="ALWAYS">
                <children>
-                  <TextArea fx:id="chatTextArea" disable="true" VBox.vgrow="ALWAYS" />
+                  <TextArea fx:id="chatTextArea" editable="false" wrapText="true" VBox.vgrow="ALWAYS">
+                     <font>
+                        <Font size="16.0" />
+                     </font>
+                  </TextArea>
                   <TextField fx:id="messageTextField" onAction="#sendMessageAction" promptText="Введите ваше сообщение и нажмите Enter" />
                </children>
             </VBox>
-            <ListView prefHeight="200.0" prefWidth="200.0" />
+            <ListView fx:id="userListView" prefHeight="200.0" prefWidth="200.0" />
          </children>
       </HBox>
    </children>

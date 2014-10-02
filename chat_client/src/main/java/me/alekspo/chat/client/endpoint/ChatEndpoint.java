@@ -9,6 +9,7 @@ import me.alekspo.chat.controller.MainWindowController;
 import org.controlsfx.dialog.Dialogs;
 
 import javax.websocket.ClientEndpoint;
+import javax.websocket.CloseReason;
 import javax.websocket.ContainerProvider;
 import javax.websocket.DeploymentException;
 import javax.websocket.OnMessage;
@@ -17,6 +18,7 @@ import javax.websocket.Session;
 import javax.websocket.WebSocketContainer;
 import java.io.IOException;
 import java.net.URI;
+import java.util.List;
 import java.util.logging.Logger;
 
 /**
@@ -71,37 +73,58 @@ public class ChatEndpoint {
       case ChatMessage.MESSAGE:
         handleChatMessage(message);
         break;
+      case ChatMessage.USERLIST_UPDATE_RESPONSE:
+        handleUserlistUpdate(message);
     }
+  }
+
+  private void handleUserlistUpdate(ChatMessage message) {
+    List updateString = (List) message.getData();
+    String username = mainWindowController.getLogin();
+    updateString.remove(username);
+    mainWindowController.updateUserlistView(updateString);
   }
 
   private void handleLoginResponse(ChatMessage message) {
     if (message.getLogin().equals(mainWindowController.getLogin())) {
-      if (message.getData().isEmpty()) {
-        Platform.runLater(() -> {
-          Dialogs.create().title("Информация").masthead("Вы успешно вошли в чат.").showInformation();
-        });
-      } else {
-        Platform.runLater(() -> {
-          Dialogs.create().title("Информация").masthead("Неверное имя пользователя или пароль.").showInformation();
-        });
+      String data = (String) message.getData();
+      switch (data) {
+        case "logged_in":
+          Platform.runLater(() -> {
+            Dialogs.create().title("Информация").masthead("Вы успешно вошли в чат.").showInformation();
+          });
+          break;
+        case "invalid_login_or_password":
+          Platform.runLater(() -> {
+            Dialogs.create().title("Информация").masthead("Неверное имя пользователя или пароль.").showInformation();
+          });
+          break;
+        case "already_logged_in":
+          Platform.runLater(() -> {
+            Dialogs.create().title("Информация").masthead("Вы уже вошли!").showInformation();
+          });
+          break;
       }
     }
   }
 
   private void handleRegisterResponse(ChatMessage message) {
     if (message.getLogin().equals(mainWindowController.getLogin())) {
-      if (message.getData().isEmpty()) {
-        Platform.runLater(() -> {
-          Dialogs.create().title("Информация").masthead("Вы успешно зарегистрировались.").showInformation();
-        });
-      } else {
-        Platform.runLater(() -> {
-          Dialogs.create().title("Информация").masthead("Имя " + message.getLogin() + " уже занято!").showInformation();
-        });
+      String data = (String) message.getData();
+      switch (data) {
+        case "duplicate":
+          Platform.runLater(() -> {
+            Dialogs.create().title("Информация").masthead("Имя " + message.getLogin() + " уже занято!").showInformation();
+          });
+          break;
+        case "success":
+          Platform.runLater(() -> {
+            Dialogs.create().title("Информация").masthead("Вы успешно зарегистрировались.").showInformation();
+          });
+          break;
       }
     }
   }
-
 
   private void handleChatMessage(ChatMessage message) {
     mainWindowController.addChatMessage(message.getLogin() + "> " + message.getMessage());
@@ -115,12 +138,16 @@ public class ChatEndpoint {
       ).showInformation();
     }
     if (userSession != null) {
-      try {
-        userSession.getBasicRemote().sendText(msg.asString());
-        logger.info("Sent message: " + msg.asString());
-      } catch (IOException e) {
-        e.printStackTrace();
-      }
+      userSession.getAsyncRemote().sendText(msg.asString());
+      logger.info("Sent message: " + msg.asString());
+    }
+  }
+
+  public void closeSession() {
+    try {
+      userSession.close(new CloseReason(CloseReason.CloseCodes.GOING_AWAY, mainWindowController.getLogin()));
+    } catch (IOException e) {
+      e.printStackTrace();
     }
   }
 }

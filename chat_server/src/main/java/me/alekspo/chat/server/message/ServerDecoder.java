@@ -49,11 +49,11 @@ public class ServerDecoder implements Decoder.Text<ServerMessage> {
       return false;
     }
     String type = jsonObject.getString("type");
-    return type.equals(ServerMessage.LOGIN)
-        || type.equals(ServerMessage.REGISTER)
+    return type.equals(ServerMessage.MESSAGE)
+        || type.equals(ServerMessage.LOGIN_REQUEST)
+        || type.equals(ServerMessage.REGISTER_REQUEST)
         || type.equals(ServerMessage.REGISTER_RESPONSE)
-        || type.equals(ServerMessage.MESSAGE)
-        || type.equals(ServerMessage.USERLIST_UPDATE);
+        || type.equals(ServerMessage.USERLIST_UPDATE_RESPONSE);
   }
 
 }

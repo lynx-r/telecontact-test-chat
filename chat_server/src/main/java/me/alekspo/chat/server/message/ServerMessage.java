@@ -13,13 +13,12 @@ import java.util.Set;
  * Time: 23:13
  */
 public class ServerMessage implements Message {
-  public static final String REGISTER = "register";
+  public static final String REGISTER_REQUEST = "register";
   public static final String REGISTER_RESPONSE = "register_response";
-  public static final String LOGIN = "login";
+  public static final String LOGIN_REQUEST = "login";
   public static final String LOGIN_RESPONSE = "login_response";
-  public static final String DISCONNECT = "disconnect";
   public static final String MESSAGE = "message";
-  public static final String USERLIST_UPDATE = "userlist_update";
+  public static final String USERLIST_UPDATE_RESPONSE = "userlist_update";
   private String type;
   private String login;
   private String password;

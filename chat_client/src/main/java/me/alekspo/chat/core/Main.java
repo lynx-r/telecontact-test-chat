@@ -47,4 +47,9 @@ public class Main extends Application {
     }
     return null;
   }
+
+  @Override
+  public void stop() {
+    mainWindowController.disconnect();
+  }
 }

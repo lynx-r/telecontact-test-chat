@@ -8,6 +8,7 @@ import me.alekspo.chat.session.ChatUserFacade;
 
 import javax.inject.Inject;
 import javax.websocket.CloseReason;
+import javax.websocket.OnClose;
 import javax.websocket.OnMessage;
 import javax.websocket.OnOpen;
 import javax.websocket.RemoteEndpoint;
@@ -30,7 +31,7 @@ import java.util.logging.Logger;
 )
 public class ChatEndpoint {
   final static Logger logger = Logger.getLogger("application");
-  private ConcurrentHashMap<String, Session> connections = new ConcurrentHashMap<String, Session>();
+  private static ConcurrentHashMap<String, Session> connections = new ConcurrentHashMap<String, Session>();
   private long MAX_IDLE_TIMEOUT = 1000 * 60 * 60;
 
   @Inject
@@ -47,19 +48,24 @@ public class ChatEndpoint {
     logger.info("Get message " + message.asString());
 
     switch (messageType) {
-      case ServerMessage.REGISTER:
+      case ServerMessage.REGISTER_REQUEST:
         handleRegisterRequest(session, message);
         break;
-      case ServerMessage.LOGIN:
+      case ServerMessage.LOGIN_REQUEST:
         handleLoginRequest(session, message);
         break;
       case ServerMessage.MESSAGE:
         handleChatMessage(message);
         break;
-      case ServerMessage.DISCONNECT:
-        handleDisconnectRequest(message);
-        break;
     }
+  }
+
+  @OnClose
+  public void onClose(CloseReason reason) {
+    logger.info("Close connection code: " + reason.getCloseCode());
+    String login = reason.getReasonPhrase();
+    connections.remove(login);
+    broadcastUserList();
   }
 
   private void handleRegisterRequest(Session session, ServerMessage message) {
@@ -68,6 +74,7 @@ public class ChatEndpoint {
     if (chatUserFacade.findByUsername(message.getLogin()).size() > 0) {
       serverMessage.setData("duplicate");
     } else {
+      serverMessage.setData("success");
       ChatUser chatUser = new ChatUser(message.getLogin(), message.getPassword());
       chatUserFacade.create(chatUser);
     }
@@ -81,11 +88,18 @@ public class ChatEndpoint {
 
   public void handleLoginRequest(Session session, ServerMessage serverMessage) {
     if (chatUserFacade.findByUsernameAndPassword(serverMessage.getLogin(), serverMessage.getPassword()).size() == 1) {
+      ServerMessage responseMessage = new ServerMessage(ServerMessage.LOGIN_RESPONSE, serverMessage.getLogin());
+      if (connections.get(serverMessage.getLogin()) != null) {
+        responseMessage.setData("already_logged_in");
+        sendMessage(session, responseMessage);
+        return;
+      } else {
+        responseMessage.setData("logged_in");
+        sendMessage(session, responseMessage);
+      }
+
       connections.put(serverMessage.getLogin(), session);
       session.setMaxIdleTimeout(MAX_IDLE_TIMEOUT);
-
-      ServerMessage responseMessage = new ServerMessage(ServerMessage.LOGIN_RESPONSE, serverMessage.getLogin());
-      sendMessage(session, responseMessage);
 
       logger.info("Signing " + serverMessage.getLogin() + " into ChatMessage.");
       broadcastUserList();
@@ -104,31 +118,10 @@ public class ChatEndpoint {
     }
   }
 
-  public void handleDisconnectRequest(ServerMessage serverMessage) {
-    logger.info(serverMessage.getLogin() + " would like to leave ChatMessage");
-    String login = serverMessage.getLogin();
-
-    logger.info("Removing " + login + " from StepMessage.");
-    Session nextSession = connections.get(login);
-
-    if (nextSession == null) {
-      return;
-    }
-
-    connections.remove(login);
-    try {
-      nextSession.close(new CloseReason(CloseReason.CloseCodes.NORMAL_CLOSURE, "User logged off"));
-    } catch (IOException e) {
-      e.printStackTrace();
-    }
-
-    broadcastUserList();
-  }
-
   private void broadcastUserList() {
     logger.info("Broadcasting updated user list");
     if (!connections.isEmpty()) {
-      ServerMessage serverMessage = new ServerMessage(ServerMessage.USERLIST_UPDATE);
+      ServerMessage serverMessage = new ServerMessage(ServerMessage.USERLIST_UPDATE_RESPONSE);
       serverMessage.setData(connections.keySet());
 
       for (Session nextSession : connections.values()) {

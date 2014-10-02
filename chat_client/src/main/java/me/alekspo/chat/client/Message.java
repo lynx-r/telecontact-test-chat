@@ -12,9 +12,9 @@ public abstract interface Message {
 
   public void setType(String type);
 
-  public String getData();
+  public Object getData();
 
-  public void setData(String data);
+  public void setData(Object data);
 
   public String asString();
 

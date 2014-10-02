@@ -11,16 +11,16 @@ import javax.json.Json;
  * Time: 14:15
  */
 public class ChatMessage implements Message {
-  public static final String REGISTER = "register";
+  public static final String REGISTER_REQUEST = "register";
   public static final String REGISTER_RESPONSE = "register_response";
-  public static final String LOGIN = "login";
+  public static final String LOGIN_REQUEST = "login";
   public static final String LOGIN_RESPONSE = "login_response";
-  public static final String USERLIST_UPDATE = "userlist_update";
+  public static final String USERLIST_UPDATE_RESPONSE = "userlist_update";
   public static final String MESSAGE = "message";
   private String type;
   private String message;
   private String login;
-  private String data;
+  private Object data;
   private String password;
 
   public ChatMessage() {
@@ -54,12 +54,12 @@ public class ChatMessage implements Message {
   }
 
   @Override
-  public String getData() {
+  public Object getData() {
     return data;
   }
 
   @Override
-  public void setData(String data) {
+  public void setData(Object data) {
     this.data = data;
   }
 
@@ -70,7 +70,7 @@ public class ChatMessage implements Message {
         .add("login", login != null ? login : "")
         .add("message", message != null ? message : "")
         .add("password", password != null ? password : "")
-        .add("data", data != null ? data : "")
+        .add("data", data != null ? data.toString() : "")
         .build().toString();
   }
 
@@ -89,4 +89,5 @@ public class ChatMessage implements Message {
   public void setLogin(String login) {
     this.login = login;
   }
+
 }
