@@ -22,6 +22,7 @@
             </Label>
             <TextField fx:id="passwordTextField" onAction="#loginAction" promptText="Пароль" text="test" />
             <Button fx:id="loginButton" mnemonicParsing="false" onAction="#loginAction" text="Войти" />
+            <Button fx:id="registerButton" mnemonicParsing="false" onAction="#registerAction" text="Регистрация" />
          </children>
       </HBox>
       <TextArea fx:id="chatTextArea" disable="true" VBox.vgrow="ALWAYS" />
